@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ObjectGraphVisualizer.cs" />
+    <Compile Include="SceneCompositionRootEditor.cs" />
     <Compile Include="UnityInspectorListEditor.cs" />
     <Compile Include="ZenEditorUtil.cs" />
     <Compile Include="ZenjectMenu.cs" />

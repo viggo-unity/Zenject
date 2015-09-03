@@ -42,6 +42,11 @@ namespace Zenject
             return Bind<TContract>((string)null);
         }
 
+        public BindingConditionSetter BindInstance<TContract>(TContract obj)
+        {
+            return Bind<TContract>((string)null).ToInstance(obj);
+        }
+
         public BinderGeneric<TContract> Bind<TContract>(string identifier)
         {
             return new CustomScopeBinder<TContract>(this, identifier, _container, _singletonMap);

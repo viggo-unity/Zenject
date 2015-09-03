@@ -41,7 +41,7 @@ namespace Zenject
 
             _disposables = _disposables.OrderBy(x => x.Priority).ToList();
 
-            WarnForMissingBindings();
+            //WarnForMissingBindings();
 
             foreach (var disposable in _disposables.Select(x => x.Disposable).GetDuplicates())
             {

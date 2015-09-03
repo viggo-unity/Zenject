@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Zenject
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public class UnityEventManager : MonoBehaviour, ITickable
     {
         public event Action ApplicationGainedFocus = delegate { };

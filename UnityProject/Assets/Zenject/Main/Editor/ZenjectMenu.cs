@@ -52,7 +52,7 @@ namespace Zenject
 
                 EditorApplication.OpenScene(sceneInfo.Path);
 
-                var compRoot = GameObject.FindObjectsOfType<CompositionRoot>().OnlyOrDefault();
+                var compRoot = GameObject.FindObjectsOfType<SceneCompositionRoot>().OnlyOrDefault();
 
                 // Do not validate if there is no comp root
                 if (compRoot != null)
@@ -84,7 +84,7 @@ namespace Zenject
         public static bool ValidateCurrentScene()
         {
             var startTime = DateTime.Now;
-            var compRoot = GameObject.FindObjectsOfType<CompositionRoot>().OnlyOrDefault();
+            var compRoot = GameObject.FindObjectsOfType<SceneCompositionRoot>().OnlyOrDefault();
 
             if (compRoot != null)
             {
@@ -115,7 +115,7 @@ namespace Zenject
             {
                 EditorApplication.OpenSceneAdditive(scenePath);
 
-                compRoot = GameObject.FindObjectsOfType<CompositionRoot>().OnlyOrDefault();
+                compRoot = GameObject.FindObjectsOfType<SceneCompositionRoot>().OnlyOrDefault();
 
                 if (compRoot == null)
                 {
@@ -123,8 +123,8 @@ namespace Zenject
                     return false;
                 }
 
-                CompositionRoot.BeforeInstallHooks += decoratorCompRoot.AddPreBindings;
-                CompositionRoot.AfterInstallHooks += decoratorCompRoot.AddPostBindings;
+                SceneCompositionRoot.BeforeInstallHooks += decoratorCompRoot.AddPreBindings;
+                SceneCompositionRoot.AfterInstallHooks += decoratorCompRoot.AddPostBindings;
 
                 return ValidateCompRoot(compRoot, startTime);
             }
@@ -141,7 +141,7 @@ namespace Zenject
             }
         }
 
-        static bool ValidateCompRoot(CompositionRoot compRoot, DateTime startTime)
+        static bool ValidateCompRoot(SceneCompositionRoot compRoot, DateTime startTime)
         {
             if (compRoot.Installers.IsEmpty())
             {

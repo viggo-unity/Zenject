@@ -5,6 +5,7 @@ using ModestTree;
 
 namespace Zenject
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public class SingletonInstanceHelper
     {
 #if !ZEN_NOT_UNITY3D

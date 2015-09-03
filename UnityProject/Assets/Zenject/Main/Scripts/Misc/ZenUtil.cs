@@ -13,6 +13,7 @@ using UnityEngine;
 
 namespace Zenject
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public class ZenUtil
     {
         // Due to the way that Unity overrides the Equals operator,
@@ -63,12 +64,12 @@ namespace Zenject
         {
             if (preBindings != null)
             {
-                CompositionRoot.BeforeInstallHooks += preBindings;
+                SceneCompositionRoot.BeforeInstallHooks += preBindings;
             }
 
             if (postBindings != null)
             {
-                CompositionRoot.AfterInstallHooks += postBindings;
+                SceneCompositionRoot.AfterInstallHooks += postBindings;
             }
 
             Assert.That(Application.CanStreamedLevelBeLoaded(levelName), "Unable to load level '{0}'", levelName);
@@ -102,7 +103,7 @@ namespace Zenject
 
             foreach (var newObject in rootObjectsAfterLoad.Except(rootObjectsBeforeLoad).Select(x => x.gameObject))
             {
-                Assert.That(newObject.GetComponent<CompositionRoot>() == null,
+                Assert.That(newObject.GetComponent<SceneCompositionRoot>() == null,
                     "LoadSceneAdditiveWithContainer does not expect a container to exist in the loaded scene");
 
                 parentContainer.InjectGameObject(newObject);

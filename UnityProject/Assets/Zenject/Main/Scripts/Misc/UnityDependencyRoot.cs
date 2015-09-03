@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Zenject
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public sealed class UnityDependencyRoot : MonoBehaviour, IDependencyRoot
     {
         [Inject]

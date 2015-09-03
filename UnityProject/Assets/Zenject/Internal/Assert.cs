@@ -26,7 +26,7 @@ namespace ModestTree
         {
             if (!condition)
             {
-                TriggerAssert("Assert hit!");
+                Throw("Assert hit!");
             }
         }
 
@@ -41,7 +41,7 @@ namespace ModestTree
         {
             if (!(obj is T))
             {
-                TriggerAssert("Assert Hit! Wrong type found. Expected '"+ typeof(T).Name + "' but found '" + obj.GetType().Name + "'. " + message);
+                Throw("Assert Hit! Wrong type found. Expected '"+ typeof(T).Name + "' but found '" + obj.GetType().Name + "'. " + message);
             }
         }
 
@@ -65,7 +65,7 @@ namespace ModestTree
                 return;
             }
 
-            TriggerAssert(string.Format("Expected to receive exception of type '{0}' but nothing was thrown", typeof(TException).Name));
+            Throw(string.Format("Expected to receive exception of type '{0}' but nothing was thrown", typeof(TException).Name));
         }
 
         // Use AssertEquals to get better error output (with values)
@@ -76,7 +76,7 @@ namespace ModestTree
             {
                 left = left ?? "<NULL>";
                 right = right ?? "<NULL>";
-                TriggerAssert("Assert Hit! Expected '" + right.ToString() + "' but found '" + left.ToString() + "'. " + messageGenerator());
+                Throw("Assert Hit! Expected '" + right.ToString() + "' but found '" + left.ToString() + "'. " + messageGenerator());
             }
         }
 
@@ -88,7 +88,7 @@ namespace ModestTree
             {
                 left = left ?? "<NULL>";
                 right = right ?? "<NULL>";
-                TriggerAssert("Assert Hit! Expected '" + right.ToString() + "' but found '" + left.ToString() + "'. " + message);
+                Throw("Assert Hit! Expected '" + right.ToString() + "' but found '" + left.ToString() + "'. " + message);
             }
         }
 
@@ -107,7 +107,7 @@ namespace ModestTree
             {
                 left = left ?? "<NULL>";
                 right = right ?? "<NULL>";
-                TriggerAssert("Assert Hit! Expected '" + right.ToString() + "' to differ from '" + left.ToString() + "'. " + messageGenerator());
+                Throw("Assert Hit! Expected '" + right.ToString() + "' to differ from '" + left.ToString() + "'. " + messageGenerator());
             }
         }
 
@@ -116,7 +116,7 @@ namespace ModestTree
         {
             if (val != null)
             {
-                TriggerAssert("Assert Hit! Expected null pointer but instead found '" + val.ToString() + "'");
+                Throw("Assert Hit! Expected null pointer but instead found '" + val.ToString() + "'");
             }
         }
 
@@ -125,7 +125,7 @@ namespace ModestTree
         {
             if (val == null)
             {
-                TriggerAssert("Assert Hit! Found null pointer when value was expected");
+                Throw("Assert Hit! Found null pointer when value was expected");
             }
         }
 
@@ -134,7 +134,7 @@ namespace ModestTree
         {
             if (val == null)
             {
-                TriggerAssert("Assert Hit! Found null pointer when value was expected. " + message);
+                Throw("Assert Hit! Found null pointer when value was expected. " + message);
             }
         }
 
@@ -143,7 +143,7 @@ namespace ModestTree
         {
             if (val != null)
             {
-                TriggerAssert("Assert Hit! Expected null pointer but instead found '" + val.ToString() + "': " + FormatString(message, parameters));
+                Throw("Assert Hit! Expected null pointer but instead found '" + val.ToString() + "': " + FormatString(message, parameters));
             }
         }
 
@@ -152,7 +152,7 @@ namespace ModestTree
         {
             if (val == null)
             {
-                TriggerAssert("Assert Hit! Found null pointer when value was expected. " + FormatString(message, parameters));
+                Throw("Assert Hit! Found null pointer when value was expected. " + FormatString(message, parameters));
             }
         }
 
@@ -164,7 +164,7 @@ namespace ModestTree
             {
                 left = left ?? "<NULL>";
                 right = right ?? "<NULL>";
-                TriggerAssert("Assert Hit! Expected '" + right.ToString() + "' to differ from '" + left.ToString() + "'. " + message);
+                Throw("Assert Hit! Expected '" + right.ToString() + "' to differ from '" + left.ToString() + "'. " + message);
             }
         }
 
@@ -175,7 +175,7 @@ namespace ModestTree
         {
             if (!condition)
             {
-                TriggerAssert("Assert hit! " + messageGenerator());
+                Throw("Assert hit! " + messageGenerator());
             }
         }
 
@@ -185,14 +185,20 @@ namespace ModestTree
         {
             if (!condition)
             {
-                TriggerAssert("Assert hit! " + FormatString(message, parameters));
+                Throw("Assert hit! " + FormatString(message, parameters));
             }
         }
 
         //[Conditional("UNITY_EDITOR")]
-        static void TriggerAssert(string message)
+        public static void Throw(string message)
         {
             throw new ZenjectException(message);
+        }
+
+        public static void Throw(string message, params object[] parameters)
+        {
+            throw new ZenjectException(
+                FormatString(message, parameters));
         }
 
         static string FormatString(string format, params object[] parameters)

@@ -6,27 +6,30 @@ using ModestTree;
 namespace Zenject
 {
     [System.Diagnostics.DebuggerStepThrough]
-    public class MethodProvider<T> : ProviderBase
+    public class MethodProviderUntyped : ProviderBase
     {
-        readonly Func<InjectContext, T> _method;
+        readonly Func<InjectContext, object> _method;
+        readonly Type _returnType;
 
-        public MethodProvider(Func<InjectContext, T> method)
+        public MethodProviderUntyped(Type returnType, Func<InjectContext, object> method)
         {
             _method = method;
+            _returnType = returnType;
         }
 
         public override Type GetInstanceType()
         {
-            return typeof(T);
+            return _returnType;
         }
 
         public override object GetInstance(InjectContext context)
         {
-            Assert.That(typeof(T).DerivesFromOrEqual(context.MemberType));
+            Assert.That(_returnType.DerivesFromOrEqual(context.MemberType));
+
             var obj = _method(context);
 
             Assert.That(obj != null, () =>
-                "Method provider returned null when looking up type '{0}'. \nObject graph:\n{1}".Fmt(typeof(T).Name(), context.GetObjectGraphString()));
+                "Method provider returned null when looking up type '{0}'. \nObject graph:\n{1}".Fmt(_returnType.Name(), context.GetObjectGraphString()));
 
             return obj;
         }
@@ -37,4 +40,3 @@ namespace Zenject
         }
     }
 }
-

@@ -96,6 +96,7 @@
     <Compile Include="Factories\FactoryNested.cs" />
     <Compile Include="Factories\FactoryUntyped.cs" />
     <Compile Include="Factories\GameObjectFactory.cs" />
+    <Compile Include="Factories\GameObjectInstantiator.cs" />
     <Compile Include="Factories\IFactory.cs" />
     <Compile Include="Factories\IFactoryUntyped.cs" />
     <Compile Include="Factories\InstantiateUtil.cs" />
@@ -119,6 +120,7 @@
     <Compile Include="Main\Installer.cs" />
     <Compile Include="Main\IResolver.cs" />
     <Compile Include="Main\MonoInstaller.cs" />
+    <Compile Include="Main\SceneCompositionRoot.cs" />
     <Compile Include="Misc\DisposableManager.cs" />
     <Compile Include="Misc\DisposablePrioritiesInstaller.cs" />
     <Compile Include="Misc\FixedTickablePrioritiesInstaller.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="Misc\InitializablePrioritiesInstaller.cs" />
     <Compile Include="Misc\ITickable.cs" />
     <Compile Include="Misc\KernelUtil.cs" />
+    <Compile Include="Misc\LateTickablePrioritiesInstaller.cs" />
     <Compile Include="Misc\SingletonInstanceHelper.cs" />
     <Compile Include="Misc\StandardUnityInstaller.cs" />
     <Compile Include="Misc\TaskUpdater.cs" />
@@ -139,8 +142,10 @@
     <Compile Include="Providers\DiContainerProvider.cs" />
     <Compile Include="Providers\GameObjectSingletonProvider.cs" />
     <Compile Include="Providers\GameObjectTransientProviderFromPrefab.cs" />
+    <Compile Include="Providers\GameObjectTransientProviderFromPrefabResource.cs" />
     <Compile Include="Providers\InstanceProvider.cs" />
     <Compile Include="Providers\MethodProvider.cs" />
+    <Compile Include="Providers\MethodProviderUntyped.cs" />
     <Compile Include="Providers\MonoBehaviourSingletonProvider.cs" />
     <Compile Include="Providers\PrefabSingletonId.cs" />
     <Compile Include="Providers\PrefabSingletonLazyCreator.cs" />

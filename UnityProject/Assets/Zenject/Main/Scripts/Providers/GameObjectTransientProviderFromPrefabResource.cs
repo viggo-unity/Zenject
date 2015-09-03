@@ -1,4 +1,4 @@
-﻿#if !ZEN_NOT_UNITY3D
+#if !ZEN_NOT_UNITY3D
 
 using System;
 using System.Collections.Generic;
@@ -8,20 +8,21 @@ using UnityEngine;
 
 namespace Zenject
 {
-    public class GameObjectTransientProviderFromPrefab : ProviderBase
+    public class GameObjectTransientProviderFromPrefabResource : ProviderBase
     {
-        readonly Type _concreteType;
         readonly DiContainer _container;
-        readonly GameObject _template;
+        readonly string _resourcePath;
+        readonly Type _concreteType;
 
-        public GameObjectTransientProviderFromPrefab(Type concreteType, DiContainer container, GameObject template)
+        public GameObjectTransientProviderFromPrefabResource(
+            Type concreteType, DiContainer container, string resourcePath)
         {
             // Don't do this because it might be an interface
-            //Assert.That(typeof(T).DerivesFrom<Component>());
+            //Assert.That(_concreteType.DerivesFrom<Component>());
 
             _concreteType = concreteType;
             _container = container;
-            _template = template;
+            _resourcePath = resourcePath;
         }
 
         public override Type GetInstanceType()
@@ -32,7 +33,8 @@ namespace Zenject
         public override object GetInstance(InjectContext context)
         {
             Assert.That(_concreteType.DerivesFromOrEqual(context.MemberType));
-            return _container.InstantiatePrefabForComponent(_concreteType, _template);
+
+            return _container.InstantiatePrefabResourceForComponent(_concreteType, _resourcePath);
         }
 
         public override IEnumerable<ZenjectResolveException> ValidateBinding(InjectContext context)
@@ -43,3 +45,4 @@ namespace Zenject
 }
 
 #endif
+

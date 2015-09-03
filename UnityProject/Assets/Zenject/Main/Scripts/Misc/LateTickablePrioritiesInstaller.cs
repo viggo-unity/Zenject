@@ -6,11 +6,11 @@ using ModestTree.Util;
 
 namespace Zenject
 {
-    public class TickablePrioritiesInstaller : Installer
+    public class LateTickablePrioritiesInstaller : Installer
     {
         List<Type> _tickables;
 
-        public TickablePrioritiesInstaller(List<Type> tickables)
+        public LateTickablePrioritiesInstaller(List<Type> tickables)
         {
             _tickables = tickables;
         }
@@ -30,7 +30,7 @@ namespace Zenject
 
         public static void BindPriority<T>(
             DiContainer container, int priorityCount)
-            where T : ITickable
+            where T : ILateTickable
         {
             BindPriority(container, typeof(T), priorityCount);
         }
@@ -38,10 +38,10 @@ namespace Zenject
         public static void BindPriority(
             DiContainer container, Type tickableType, int priorityCount)
         {
-            Assert.That(tickableType.DerivesFrom<ITickable>(),
-                "Expected type '{0}' to derive from ITickable", tickableType.Name());
+            Assert.That(tickableType.DerivesFrom<ILateTickable>(),
+                "Expected type '{0}' to derive from ILateTickable", tickableType.Name());
 
-            container.Bind<ModestTree.Util.Tuple<Type, int>>().ToInstance(
+            container.Bind<ModestTree.Util.Tuple<Type, int>>("Late").ToInstance(
                 ModestTree.Util.Tuple.New(tickableType, priorityCount)).WhenInjectedInto<TickableManager>();
         }
     }

@@ -14,10 +14,15 @@ namespace Zenject
         {
             ZenjectTypeInfo info;
 
-            if (!_typeInfo.TryGetValue(type, out info))
+#if ZEN_MULTITHREADING
+            lock (_typeInfo)
+#endif
             {
-                info = CreateTypeInfo(type);
-                _typeInfo.Add(type, info);
+                if (!_typeInfo.TryGetValue(type, out info))
+                {
+                    info = CreateTypeInfo(type);
+                    _typeInfo.Add(type, info);
+                }
             }
 
             return info;

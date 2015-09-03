@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace Zenject
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public sealed class SceneDecoratorCompositionRoot : MonoBehaviour
     {
         public string SceneName;
@@ -27,11 +28,11 @@ namespace Zenject
         {
             DontDestroyOnLoad(gameObject);
 
-            _beforeInstallHooks = CompositionRoot.BeforeInstallHooks;
-            CompositionRoot.BeforeInstallHooks = null;
+            _beforeInstallHooks = SceneCompositionRoot.BeforeInstallHooks;
+            SceneCompositionRoot.BeforeInstallHooks = null;
 
-            _afterInstallHooks = CompositionRoot.AfterInstallHooks;
-            CompositionRoot.AfterInstallHooks = null;
+            _afterInstallHooks = SceneCompositionRoot.AfterInstallHooks;
+            SceneCompositionRoot.AfterInstallHooks = null;
 
             ZenUtil.LoadScene(
                 SceneName, AddPreBindings, AddPostBindings);
@@ -45,9 +46,9 @@ namespace Zenject
                 _beforeInstallHooks = null;
             }
 
-            // Make our scene graph a child of the new CompositionRoot so any monobehaviour's that are
+            // Make our scene graph a child of the new SceneCompositionRoot so any monobehaviour's that are
             // built into the scene get injected
-            transform.parent = container.Resolve<CompositionRoot>().transform;
+            transform.parent = container.Resolve<SceneCompositionRoot>().transform;
 
             CompositionRootHelper.InstallSceneInstallers(container, PreInstallers);
 
@@ -76,11 +77,7 @@ namespace Zenject
 
             foreach (var installer in DecoratorInstallers)
             {
-                if (installer == null)
-                {
-                    Log.Warn("Found null installer in composition root");
-                    continue;
-                }
+                Assert.IsNotNull(installer, "Found null installer in composition root");
 
                 if (installer.enabled)
                 {

@@ -10,13 +10,13 @@ using UnityEngine;
 
 namespace Zenject
 {
-    public sealed class GlobalCompositionRoot : MonoBehaviour
+    public sealed class GlobalCompositionRoot : CompositionRoot
     {
         static GlobalCompositionRoot _instance;
         DiContainer _container;
         IDependencyRoot _dependencyRoot;
 
-        public DiContainer Container
+        public override DiContainer Container
         {
             get
             {
@@ -44,7 +44,7 @@ namespace Zenject
             // Is this a good idea?
             //go.hideFlags = HideFlags.HideInHierarchy;
 
-            _container = CreateContainer(false, gameObject);
+            _container = CreateContainer(false, this);
             _dependencyRoot = _container.Resolve<IDependencyRoot>();
         }
 
@@ -55,15 +55,19 @@ namespace Zenject
             _dependencyRoot = null;
         }
 
-        public static DiContainer CreateContainer(bool allowNullBindings, GameObject gameObj)
+        public static DiContainer CreateContainer(bool allowNullBindings, GlobalCompositionRoot root)
         {
-            Assert.That(allowNullBindings || gameObj != null);
+            Assert.That(allowNullBindings || root != null);
 
-            var container = new DiContainer(gameObj == null ? null : gameObj.transform);
+            var container = new DiContainer(root == null ? null : root.transform);
 
             container.AllowNullBindings = allowNullBindings;
 
-            CompositionRootHelper.InstallStandardInstaller(container, gameObj);
+            container.Bind<GlobalCompositionRoot>().ToInstance(root);
+            container.Bind<CompositionRoot>().ToInstance(root);
+
+            container.Install<StandardUnityInstaller>();
+
             CompositionRootHelper.InstallSceneInstallers(container, GetGlobalInstallers());
 
             return container;
@@ -71,14 +75,11 @@ namespace Zenject
 
         static IEnumerable<IInstaller> GetGlobalInstallers()
         {
-            var installerConfig = (GlobalInstallerConfig)Resources.Load("ZenjectGlobalCompositionRoot", typeof(GlobalInstallerConfig));
+            // Allow either naming convention
+            var installerConfigs1 = Resources.LoadAll("ZenjectGlobalCompositionRoot", typeof(GlobalInstallerConfig));
+            var installerConfigs2 = Resources.LoadAll("ZenjectGlobalInstallers", typeof(GlobalInstallerConfig));
 
-            if (installerConfig == null)
-            {
-                return Enumerable.Empty<IInstaller>();
-            }
-
-            return installerConfig.Installers;
+            return installerConfigs1.Concat(installerConfigs2).Cast<GlobalInstallerConfig>().SelectMany(x => x.Installers).Cast<IInstaller>();
         }
     }
 }

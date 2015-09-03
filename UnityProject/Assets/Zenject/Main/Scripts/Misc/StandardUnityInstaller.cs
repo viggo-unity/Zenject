@@ -9,12 +9,12 @@ namespace Zenject
     public class StandardUnityInstaller : Installer
     {
         [Inject]
-        GameObject _root = null;
+        CompositionRoot _root = null;
 
         // Install basic functionality for most unity apps
         public override void InstallBindings()
         {
-            Container.Bind<IDependencyRoot>().ToSingleMonoBehaviour<UnityDependencyRoot>(_root);
+            Container.Bind<IDependencyRoot>().ToSingleMonoBehaviour<UnityDependencyRoot>(_root == null ? null : _root.gameObject);
 
             Container.Bind<TickableManager>().ToSingle();
 

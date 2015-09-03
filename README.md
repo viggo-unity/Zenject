@@ -330,13 +330,42 @@ Container.Bind<BarMonoBehaviour>().ToSinglePrefab(PrefabGameObject);
 
 This will result in the prefab `PrefabGameObject` being instantiated once, and then searched for monobehaviour's `FooMonoBehaviour` and `BarMonoBehaviour`
 
+**ToSinglePrefabResource** - Load prefab via resources folder
+
+Same as ToSinglePrefab except loads the prefab using a path in Resources folder
+
+```csharp
+Container.Bind<FooMonoBehaviour>().ToSinglePrefabResource("MyDirectory/MyPrefab");
+```
+
+In this example, I've placed my prefab at Assets/Resources/MyDirectory/MyPrefab.prefab.  By doing this I don't have to pass in a GameObject and can refer to it by the path within the resources folder.
+
+Note that you can re-use the same singleton instance for multiple monobehaviours that exist on the prefab.
+
+```csharp
+Container.Bind<FooMonoBehaviour>().ToSinglePrefabResource("MyDirectory/MyPrefab");
+Container.Bind<BarMonoBehaviour>().ToSinglePrefabResource("MyDirectory/MyPrefab");
+```
+
+In the above example, the prefab will only be instantiated once.
+
 **ToTransientPrefab** - Inject by instantiating a unity prefab each time
 
 ```csharp
-Container.Bind<FooMonoBehaviour>().ToTransientPrefab<FooMonoBehaviour>(PrefabGameObject);
+Container.Bind<FooMonoBehaviour>().ToTransientPrefab(PrefabGameObject);
 ```
 
 This works similar to ToSinglePrefab except it will instantiate a new instance of the given prefab every time the dependency is injected.
+
+**ToTransientPrefabResource** - Load prefab via resources folder
+
+Same as ToTransientPrefab except loads the prefab using a path in Resources folder
+
+```csharp
+Container.Bind<FooMonoBehaviour>().ToTransientPrefabResource("MyDirectory/MyPrefab");
+```
+
+In the above example, I've placed my prefab at Assets/Resources/MyDirectory/MyPrefab.prefab.  By doing this I don't have to pass in a GameObject and can refer to it by the path within the resources folder.
 
 **ToSingleGameObject** - Inject by instantiating a new game object and using that everywhere
 
@@ -791,9 +820,9 @@ A Zenject driven application is executed by the following steps:
 * Composition Root is started (via Unity Awake() method)
 * Composition Root creates a new DiContainer object to be used to contain all instances used in the scene
 * Composition Root iterates through all the Installers that have been added to it via the Unity Inspector, and updates them to point to the new DiContainer.  It then calls InstallBindings() on each installer.
-* Each Installer then registers different sets of dependencies directly on to the given DiContainer by calling one of the Bind<> methods.  Note that the order that this binding occurs should not generally matter. Each installer may also include other installers by calling Container.Install. Each installer can also add bindings to configure other installers, however note that in this case order might actually matter, since you will have to make sure that code configuring other installers is executed before the installers that you are configuring! You can control the order by simply re-ordering the Installers property of the CompositionRoot
-* The Composition Root then traverses all game object descendants (or the entire scene if 'Inject on Full Scene' property is checked in the inspector) and injects all MonoBehaviours with their dependencies. Since MonoBehaviours are instantiated by Unity we cannot use constructor injection in this case and therefore [PostInject] injection, field injection or property injection must be used instead.  Any methods on these MonoBehaviour's marked with [PostInject] are called at this point as well.
-* After filling in the scene dependencies the Composition Root then retrieves the instance of IDependencyRoot, which contains the objects that handle the ITickable/IInitializable/IDisposable interfaces.
+* Each Installer then registers different sets of dependencies directly on to the given DiContainer by calling one of the Bind<> methods.  Note that the order that this binding occurs should not generally matter. Each installer may also include other installers by calling Container.Install<>. Each installer can also add bindings to configure other installers, however note that in this case order might actually matter, since you will have to make sure that code configuring other installers is executed before the installers that you are configuring! You can control the order by simply re-ordering the Installers property of the CompositionRoot
+* The Composition Root then traverses all game object descendants (or the entire scene if 'Inject on Full Scene' property is checked in the inspector) and injects all MonoBehaviours with their dependencies. Since MonoBehaviours are instantiated by Unity we cannot use constructor injection in this case and therefore [PostInject] injection, field injection or property injection must be used instead.
+* After filling in the scene dependencies the Composition Root then executes a single resolve for 'IDependencyRoot'.  For unity apps this is UnityDependencyRoot (which implements the IDependencyRoot interface).  The UnityDependencyRoot class has dependencies on TickableManager, InitializableManager, and DisposableManager classes, and therefore Zenject constructs instances of those as well before creating the UnityDependencyRoot.  Those classes contains dependencies for lists of ITickable, IInitializable, and IDisposables.  So once again Zenject resolves all instances bound to any of these interfaces before constructing the manager classes.  This is important to know because it is why when you bind something to ITickable/IInitializable/IDisposable, it is always created at startup.
 * If any required dependencies cannot be resolved, a ZenjectResolveException is thrown
 * Initialize() is called on all IInitializable objects in the order specified in the installers
 * Unity Start() is called on all built-in MonoBehaviours

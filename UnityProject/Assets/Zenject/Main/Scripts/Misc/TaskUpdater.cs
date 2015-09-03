@@ -6,11 +6,12 @@ using ModestTree;
 namespace Zenject
 {
     // Update tasks once per frame based on a priority
+    [System.Diagnostics.DebuggerStepThrough]
     public class TaskUpdater<TTask>
     {
-        LinkedList<TaskInfo> _tasks = new LinkedList<TaskInfo>();
+        readonly LinkedList<TaskInfo> _tasks = new LinkedList<TaskInfo>();
+        readonly List<TaskInfo> _queuedTasks = new List<TaskInfo>();
 
-        List<TaskInfo> _queuedTasks = new List<TaskInfo>();
         Action<TTask> _updateFunc;
 
         IEnumerable<TaskInfo> AllTasks
