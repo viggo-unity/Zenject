@@ -7,5 +7,6 @@ namespace Zenject
     // for the the given run configuration
     public interface IDependencyRoot
     {
+        void Initialize();
     }
 }

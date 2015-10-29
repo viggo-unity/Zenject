@@ -94,6 +94,12 @@ namespace Zenject
 
 #if !ZEN_NOT_UNITY3D
 
+        public BindingConditionSetter ToResource<TConcrete>(string resourcePath)
+            where TConcrete : TContract
+        {
+            return ToResource(typeof(TConcrete), resourcePath);
+        }
+
         // Note: Here we assume that the contract is a component on the given prefab
         public BindingConditionSetter ToTransientPrefabResource<TConcrete>(string resourcePath)
             where TConcrete : TContract

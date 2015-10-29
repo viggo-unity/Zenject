@@ -26,11 +26,6 @@ namespace Zenject
             return ToLookupBase<TConcrete>(identifier);
         }
 
-        public BindingConditionSetter ToMethod<TContract>(Func<InjectContext, TContract> method)
-        {
-            return ToMethodBase<TContract>(method);
-        }
-
         public BindingConditionSetter ToMethod(Type returnType, Func<InjectContext, object> method)
         {
             if (!returnType.DerivesFromOrEqual(ContractType))
@@ -40,6 +35,11 @@ namespace Zenject
             }
 
             return ToProvider(new MethodProviderUntyped(returnType, method));
+        }
+
+        public BindingConditionSetter ToMethod<TContract>(Func<InjectContext, TContract> method)
+        {
+            return ToMethodBase<TContract>(method);
         }
 
         public BindingConditionSetter ToGetter<TObj, TContract>(Func<TObj, TContract> method)
@@ -93,6 +93,11 @@ namespace Zenject
         }
 
 #if !ZEN_NOT_UNITY3D
+
+        public BindingConditionSetter ToResource<TConcrete>(string resourcePath)
+        {
+            return ToResource(typeof(TConcrete), resourcePath);
+        }
 
         // Note: Here we assume that the contract is a component on the given prefab
         public BindingConditionSetter ToTransientPrefabResource<TConcrete>(string resourcePath)

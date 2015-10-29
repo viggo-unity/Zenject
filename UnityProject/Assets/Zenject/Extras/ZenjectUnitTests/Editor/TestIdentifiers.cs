@@ -65,5 +65,15 @@ namespace Zenject.Tests
 
             Assert.IsEqual(Container.ResolveAll<Test0>("foo").Count, 2);
         }
+
+        [Test]
+        public void TestToMethodUntyped()
+        {
+            Container.Bind(typeof(Test0)).ToMethod((ctx) => new Test0());
+
+            Container.Resolve<Test0>();
+
+            Assert.That(Container.ValidateResolve<Test0>().IsEmpty());
+        }
     }
 }

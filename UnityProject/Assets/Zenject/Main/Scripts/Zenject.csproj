@@ -104,6 +104,7 @@
     <Compile Include="Factories\IValidatableFactory.cs" />
     <Compile Include="Factories\KeyedFactory.cs" />
     <Compile Include="Factories\ListFactory.cs" />
+    <Compile Include="Factories\PrefabFactory.cs" />
     <Compile Include="Injection\InjectableInfo.cs" />
     <Compile Include="Injection\TypeAnalyzer.cs" />
     <Compile Include="Injection\ZenjectTypeInfo.cs" />
@@ -152,6 +153,7 @@
     <Compile Include="Providers\PrefabSingletonProvider.cs" />
     <Compile Include="Providers\PrefabSingletonProviderMap.cs" />
     <Compile Include="Providers\ProviderBase.cs" />
+    <Compile Include="Providers\ResourceProvider.cs" />
     <Compile Include="Providers\SingletonId.cs" />
     <Compile Include="Providers\SingletonLazyCreator.cs" />
     <Compile Include="Providers\SingletonProvider.cs" />

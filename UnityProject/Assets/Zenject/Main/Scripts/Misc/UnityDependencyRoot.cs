@@ -24,9 +24,8 @@ namespace Zenject
         // For cases where you have game objects that aren't referenced anywhere but still want them to be
         // created on startup
         [InjectOptional]
-        public List<MonoBehaviour> _initialObjects = null;
+        public List<object> _initialObjects = null;
 
-        [PostInject]
         public void Initialize()
         {
             _initializableManager.Initialize();

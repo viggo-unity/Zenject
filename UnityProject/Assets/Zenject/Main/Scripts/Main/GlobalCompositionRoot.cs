@@ -15,6 +15,7 @@ namespace Zenject
         static GlobalCompositionRoot _instance;
         DiContainer _container;
         IDependencyRoot _dependencyRoot;
+        bool _hasInitialized;
 
         public override DiContainer Container
         {
@@ -46,6 +47,15 @@ namespace Zenject
 
             _container = CreateContainer(false, this);
             _dependencyRoot = _container.Resolve<IDependencyRoot>();
+        }
+
+        public void InitializeIfNecessary()
+        {
+            if (!_hasInitialized)
+            {
+                _hasInitialized = true;
+                _dependencyRoot.Initialize();
+            }
         }
 
         // If we're destroyed manually somehow handle that

@@ -65,11 +65,6 @@ namespace Zenject
             return _typeMap.ContainsKey(key);
         }
 
-        public Type GetMapping(TKey key)
-        {
-            return _typeMap[key];
-        }
-
         protected Type GetTypeForKey(TKey key)
         {
             Type keyedType;

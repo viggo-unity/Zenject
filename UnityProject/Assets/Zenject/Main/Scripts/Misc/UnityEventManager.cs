@@ -36,6 +36,8 @@ namespace Zenject
 
         public event Action ScreenSizeChanged = delegate { };
 
+        public event Action Started = delegate { };
+
         Vector3 _lastMousePosition;
 
         int _lastWidth;
@@ -51,6 +53,7 @@ namespace Zenject
         {
             _lastWidth = Screen.width;
             _lastHeight = Screen.height;
+            Started();
         }
 
         public void Tick()

@@ -137,8 +137,6 @@
     <Compile Include="TestUnbind.cs" />
     <Compile Include="TestValidateInstaller.cs" />
     <Compile Include="TestWithContainer.cs" />
-    <Compile Include="UnityTests\TestToSingleGameObject.cs" />
-    <Compile Include="UnityTests\TestToSinglePrefab.cs" />
     <Compile Include="ZenjectProfileTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

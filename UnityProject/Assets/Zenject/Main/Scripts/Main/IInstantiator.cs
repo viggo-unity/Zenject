@@ -32,10 +32,8 @@ namespace Zenject
         GameObject InstantiatePrefabExplicit(
             GameObject prefab, IEnumerable<object> extraArgMap, InjectContext currentContext);
 
-        // Instantiate the given prefab, inject on all MonoBehaviours, then return the instance of 'componentType'
-        // Any arguments supplied are assumed to be used as extra parameters into 'componentType'
-        object InstantiatePrefabForComponentExplicit(
-            Type componentType, GameObject prefab, List<TypeValuePair> extraArgMap, InjectContext currentContext);
+        GameObject InstantiatePrefabExplicit(
+            GameObject prefab, IEnumerable<object> extraArgMap, InjectContext currentContext, bool includeInactive);
 
         // Instantiate an empty game object and then add a component to it of type 'componentType'
         object InstantiateComponentOnNewGameObjectExplicit(
@@ -57,9 +55,21 @@ namespace Zenject
         GameObject InstantiatePrefab(
             GameObject prefab, params object[] args);
 
+        GameObject InstantiatePrefab(
+            bool includeInactive, GameObject prefab, params object[] args);
+
         // Create a new game object from a resource path and fill in dependencies for all children
         GameObject InstantiatePrefabResource(
             string resourcePath, params object[] args);
+
+        GameObject InstantiatePrefabResource(
+            bool includeInactive, string resourcePath, params object[] args);
+
+        GameObject InstantiatePrefabResourceExplicit(
+            string resourcePath, IEnumerable<object> extraArgMap, InjectContext context);
+
+        GameObject InstantiatePrefabResourceExplicit(
+            string resourcePath, IEnumerable<object> extraArgMap, InjectContext context, bool includeInactive);
 
         /////////////// InstantiatePrefabForComponent
 
@@ -68,8 +78,14 @@ namespace Zenject
         T InstantiatePrefabForComponent<T>(
             GameObject prefab, params object[] extraArgs);
 
+        T InstantiatePrefabForComponent<T>(
+            bool includeInactive, GameObject prefab, params object[] extraArgs);
+
         object InstantiatePrefabForComponent(
             Type concreteType, GameObject prefab, params object[] extraArgs);
+
+        object InstantiatePrefabForComponent(
+            bool includeInactive, Type concreteType, GameObject prefab, params object[] extraArgs);
 
         // This is used instead of Instantiate to support specifying null values
         T InstantiatePrefabForComponentExplicit<T>(
@@ -77,6 +93,14 @@ namespace Zenject
 
         object InstantiatePrefabForComponentExplicit(
             Type concreteType, GameObject prefab, List<TypeValuePair> extraArgMap);
+
+        // Instantiate the given prefab, inject on all MonoBehaviours, then return the instance of 'componentType'
+        // Any arguments supplied are assumed to be used as extra parameters into 'componentType'
+        object InstantiatePrefabForComponentExplicit(
+            Type componentType, GameObject prefab, List<TypeValuePair> extraArgMap, InjectContext currentContext);
+
+        object InstantiatePrefabForComponentExplicit(
+            Type componentType, GameObject prefab, List<TypeValuePair> extraArgMap, InjectContext currentContext, bool includeInactive);
 
         /////////////// InstantiatePrefabResourceForComponent
 

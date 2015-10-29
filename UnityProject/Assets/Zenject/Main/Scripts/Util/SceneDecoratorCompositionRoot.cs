@@ -1,9 +1,12 @@
 #if !ZEN_NOT_UNITY3D
 
 using System;
+using System.Collections;
 using ModestTree;
+using ModestTree.Util;
 using ModestTree.Util.Debugging;
 using UnityEngine;
+using System.Linq;
 
 namespace Zenject
 {
@@ -26,7 +29,15 @@ namespace Zenject
 
         public void Awake()
         {
-            DontDestroyOnLoad(gameObject);
+            StartCoroutine(Init());
+        }
+
+        IEnumerator Init()
+        {
+#pragma warning disable 168
+            // Ensure the global comp root is initialized so that it doesn't get parented to us below
+            var globalRoot = GlobalCompositionRoot.Instance;
+#pragma warning restore 168
 
             _beforeInstallHooks = SceneCompositionRoot.BeforeInstallHooks;
             SceneCompositionRoot.BeforeInstallHooks = null;
@@ -34,8 +45,20 @@ namespace Zenject
             _afterInstallHooks = SceneCompositionRoot.AfterInstallHooks;
             SceneCompositionRoot.AfterInstallHooks = null;
 
-            ZenUtil.LoadScene(
+            var rootObjectsBeforeLoad = UnityUtil.GetRootGameObjects();
+
+            ZenUtil.LoadSceneAdditive(
                 SceneName, AddPreBindings, AddPostBindings);
+
+            // Wait one frame for objects to be added to the scene heirarchy
+            yield return null;
+
+            var newlyAddedObjects = UnityUtil.GetRootGameObjects().Except(rootObjectsBeforeLoad);
+
+            foreach (var obj in newlyAddedObjects)
+            {
+                obj.transform.SetParent(this.transform);
+            }
         }
 
         public void AddPreBindings(DiContainer container)
@@ -45,10 +68,6 @@ namespace Zenject
                 _beforeInstallHooks(container);
                 _beforeInstallHooks = null;
             }
-
-            // Make our scene graph a child of the new SceneCompositionRoot so any monobehaviour's that are
-            // built into the scene get injected
-            transform.parent = container.Resolve<SceneCompositionRoot>().transform;
 
             CompositionRootHelper.InstallSceneInstallers(container, PreInstallers);
 

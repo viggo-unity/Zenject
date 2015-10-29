@@ -5,7 +5,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 using System.Linq;
-using Debug=UnityEngine.Debug;
+using Debug = UnityEngine.Debug;
 using ModestTree;
 
 namespace Zenject
@@ -75,7 +75,7 @@ namespace Zenject
             else
             {
                 Log.Error("Validated {0}/{1} scenes. Failed to validate the following: {2}",
-                    activeScenes.Count-failedScenes.Count, activeScenes.Count, failedScenes.Join(", "));
+                    activeScenes.Count - failedScenes.Count, activeScenes.Count, failedScenes.Join(", "));
                 return false;
             }
         }
@@ -197,4 +197,3 @@ namespace Zenject
         }
     }
 }
-

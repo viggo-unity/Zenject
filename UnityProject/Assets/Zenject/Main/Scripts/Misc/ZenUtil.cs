@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Diagnostics;
 using ModestTree;
+using ModestTree.Util;
 
 #if !ZEN_NOT_UNITY3D
 using UnityEngine;
@@ -92,16 +93,16 @@ namespace Zenject
         public static IEnumerator LoadSceneAdditiveWithContainer(
             string levelName, DiContainer parentContainer)
         {
-            var rootObjectsBeforeLoad = GameObject.FindObjectsOfType<Transform>().Where(x => x.parent == null).ToList();
+            var rootObjectsBeforeLoad = UnityUtil.GetRootGameObjects();
 
             Application.LoadLevelAdditive(levelName);
 
             // Wait one frame for objects to be added to the scene heirarchy
             yield return null;
 
-            var rootObjectsAfterLoad = GameObject.FindObjectsOfType<Transform>().Where(x => x.parent == null).ToList();
+            var rootObjectsAfterLoad = UnityUtil.GetRootGameObjects();
 
-            foreach (var newObject in rootObjectsAfterLoad.Except(rootObjectsBeforeLoad).Select(x => x.gameObject))
+            foreach (var newObject in rootObjectsAfterLoad.Except(rootObjectsBeforeLoad))
             {
                 Assert.That(newObject.GetComponent<SceneCompositionRoot>() == null,
                     "LoadSceneAdditiveWithContainer does not expect a container to exist in the loaded scene");

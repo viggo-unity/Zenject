@@ -137,6 +137,88 @@ namespace Zenject.Tests
             Assert.Throws<ZenjectResolveException>(
                 delegate { Container.Resolve<Test6>(); });
         }
+
+        class Test7
+        {
+            public int Val1;
+
+            public Test7(
+                [InjectOptional]
+                int val1)
+            {
+                Val1 = val1;
+            }
+        }
+
+        [Test]
+        public void TestPrimitiveParamOptionalUsesDefault()
+        {
+            Container.Bind<Test7>().ToSingle();
+
+            Assert.That(Container.ValidateResolve<Test7>().IsEmpty());
+
+            Assert.IsEqual(Container.Resolve<Test7>().Val1, 0);
+        }
+
+        class Test8
+        {
+            public int Val1;
+
+            public Test8(
+                [InjectOptional]
+                int val1 = 5)
+            {
+                Val1 = val1;
+            }
+        }
+
+        [Test]
+        public void TestPrimitiveParamOptionalUsesExplicitDefault()
+        {
+            Container.Bind<Test8>().ToSingle();
+            Assert.That(Container.ValidateResolve<Test8>().IsEmpty());
+            Assert.IsEqual(Container.Resolve<Test8>().Val1, 5);
+        }
+
+        class Test8_2
+        {
+            public int Val1;
+
+            public Test8_2(int val1 = 5)
+            {
+                Val1 = val1;
+            }
+        }
+
+        [Test]
+        public void TestPrimitiveParamOptionalUsesExplicitDefault2()
+        {
+            Container.Bind<Test8_2>().ToSingle();
+            Assert.That(Container.ValidateResolve<Test8_2>().IsEmpty());
+            Assert.IsEqual(Container.Resolve<Test8_2>().Val1, 5);
+        }
+
+        class Test9
+        {
+            public int? Val1;
+
+            public Test9(
+                [InjectOptional]
+                int? val1)
+            {
+                Val1 = val1;
+            }
+        }
+
+        [Test]
+        public void TestPrimitiveParamOptionalNullable()
+        {
+            Container.Bind<Test9>().ToSingle();
+
+            Assert.That(Container.ValidateResolve<Test9>().IsEmpty());
+
+            Assert.That(!Container.Resolve<Test9>().Val1.HasValue);
+        }
     }
 }
 

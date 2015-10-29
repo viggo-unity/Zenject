@@ -82,7 +82,7 @@ namespace Asteroids
 
         public override void OnTriggerEnter(Collider other)
         {
-            Assert.That(other.tag == "asteroid");
+            Assert.That(other.GetComponent<Asteroid>() != null);
             _ship.ChangeState(ShipStates.Dead, _ship);
         }
 

@@ -147,11 +147,5 @@ namespace Zenject.Tests
             {
             }
         }
-
-        class TestDependencyRoot : IDependencyRoot
-        {
-            [Inject]
-            public IFoo _foo = null;
-        }
     }
 }

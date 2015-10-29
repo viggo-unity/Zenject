@@ -1,8 +1,13 @@
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using ModestTree;
+
+#if !ZEN_NOT_UNITY3D
+using UnityEngine;
+#endif
 
 namespace Zenject
 {
@@ -72,13 +77,16 @@ namespace Zenject
                 identifier = injectOptionalAttributes.Single().Identifier;
             }
 
+            bool isOptionalWithADefaultValue = (paramInfo.Attributes & ParameterAttributes.HasDefault) == ParameterAttributes.HasDefault;
+
             return new InjectableInfo(
-                injectOptionalAttributes.Any(),
+                isOptionalWithADefaultValue || injectOptionalAttributes.Any(),
                 identifier,
                 paramInfo.Name,
                 paramInfo.ParameterType,
                 parentType,
-                null);
+                null,
+                isOptionalWithADefaultValue ? paramInfo.DefaultValue : null);
         }
 
         static List<PostInjectableInfo> GetPostInjectMethods(Type type)
@@ -179,13 +187,23 @@ namespace Zenject
                 memInfo.Name,
                 memberType,
                 parentType,
-                setter);
+                setter,
+                null);
         }
 
         static ConstructorInfo GetInjectConstructor(Type parentType)
         {
             var constructors = parentType.GetConstructors(
                 BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+#if !ZEN_NOT_UNITY3D
+            if (Application.platform == RuntimePlatform.WP8Player)
+            {
+                // WP8 generates a dummy constructor with signature (internal Classname(UIntPtr dummy))
+                // So just ignore that
+                constructors = constructors.Where(c => !IsWp8GeneratedConstructor(c)).ToArray();
+            }
+#endif
 
             if (constructors.IsEmpty())
             {
@@ -200,5 +218,12 @@ namespace Zenject
 
             return constructors[0];
         }
+
+        static bool IsWp8GeneratedConstructor(ConstructorInfo c)
+        {
+            ParameterInfo[] args = c.GetParameters();
+            return args.Length == 1 && args[0].ParameterType == typeof(UIntPtr) && args[0].Name == "dummy";
+        }
     }
 }
+

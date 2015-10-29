@@ -533,22 +533,22 @@ namespace Zenject
                     return ResolveAll(subContext);
                 }
 
-                if (!context.Optional)
+                if (context.Optional)
                 {
-                    if (_fallbackProvider != null)
-                    {
-                        return _fallbackProvider.GetInstance(context);
-                    }
-
-                    throw new ZenjectResolveException(
-                        "Unable to resolve type '{0}'{1}. \nObject graph:\n{2}"
-                        .Fmt(
-                            context.MemberType.Name() + (context.Identifier == null ? "" : " with ID '" + context.Identifier.ToString() + "'"),
-                            (context.ObjectType == null ? "" : " while building object with type '{0}'".Fmt(context.ObjectType.Name())),
-                            context.GetObjectGraphString()));
+                    return context.FallBackValue;
                 }
 
-                return null;
+                if (_fallbackProvider != null)
+                {
+                    return _fallbackProvider.GetInstance(context);
+                }
+
+                throw new ZenjectResolveException(
+                    "Unable to resolve type '{0}'{1}. \nObject graph:\n{2}"
+                    .Fmt(
+                        context.MemberType.Name() + (context.Identifier == null ? "" : " with ID '" + context.Identifier.ToString() + "'"),
+                        (context.ObjectType == null ? "" : " while building object with type '{0}'".Fmt(context.ObjectType.Name())),
+                        context.GetObjectGraphString()));
             }
 
             ProviderBase provider;
@@ -800,13 +800,25 @@ namespace Zenject
         public GameObject InstantiatePrefabResourceExplicit(
             string resourcePath, IEnumerable<object> extraArgMap, InjectContext context)
         {
+            return InstantiatePrefabResourceExplicit(resourcePath, extraArgMap, context, false);
+        }
+
+        public GameObject InstantiatePrefabResourceExplicit(
+            string resourcePath, IEnumerable<object> extraArgMap, InjectContext context, bool includeInactive)
+        {
             var prefab = (GameObject)Resources.Load(resourcePath);
             Assert.IsNotNull(prefab, "Could not find prefab at resource location '{0}'".Fmt(resourcePath));
-            return InstantiatePrefabExplicit(prefab, extraArgMap, context);
+            return InstantiatePrefabExplicit(prefab, extraArgMap, context, includeInactive);
         }
 
         public GameObject InstantiatePrefabExplicit(
             GameObject prefab, IEnumerable<object> extraArgMap, InjectContext context)
+        {
+            return InstantiatePrefabExplicit(prefab, extraArgMap, context, false);
+        }
+
+        public GameObject InstantiatePrefabExplicit(
+            GameObject prefab, IEnumerable<object> extraArgMap, InjectContext context, bool includeInactive)
         {
             var gameObj = (GameObject)GameObject.Instantiate(prefab);
 
@@ -821,7 +833,7 @@ namespace Zenject
 
             gameObj.SetActive(true);
 
-            this.InjectGameObject(gameObj, true, false, extraArgMap, context);
+            this.InjectGameObject(gameObj, true, includeInactive, extraArgMap, context);
 
             return gameObj;
         }
@@ -876,6 +888,12 @@ namespace Zenject
         public object InstantiatePrefabForComponentExplicit(
             Type componentType, GameObject prefab, List<TypeValuePair> extraArgs, InjectContext currentContext)
         {
+            return InstantiatePrefabForComponentExplicit(componentType, prefab, extraArgs, currentContext, false);
+        }
+
+        public object InstantiatePrefabForComponentExplicit(
+            Type componentType, GameObject prefab, List<TypeValuePair> extraArgs, InjectContext currentContext, bool includeInactive)
+        {
             Assert.That(prefab != null, "Null prefab found when instantiating game object");
 
             // It could be an interface so this may fail in valid cases so you may want to comment out
@@ -898,7 +916,7 @@ namespace Zenject
             Component requestedScript = null;
 
             // Inject on the children first since the parent objects are more likely to use them in their post inject methods
-            foreach (var component in UnityUtil.GetComponentsInChildrenBottomUp<Component>(gameObj, false))
+            foreach (var component in UnityUtil.GetComponentsInChildrenBottomUp<Component>(gameObj, includeInactive))
             {
                 if (component != null)
                 {
@@ -977,10 +995,22 @@ namespace Zenject
             return InstantiatePrefabExplicit(prefab, args, null);
         }
 
+        public GameObject InstantiatePrefab(
+            bool includeInactive, GameObject prefab, params object[] args)
+        {
+            return InstantiatePrefabExplicit(prefab, args, null, includeInactive);
+        }
+
         public GameObject InstantiatePrefabResource(
             string resourcePath, params object[] args)
         {
-            return InstantiatePrefabResourceExplicit(resourcePath, args, null);
+            return InstantiatePrefabResourceExplicit(resourcePath, args, null, false);
+        }
+
+        public GameObject InstantiatePrefabResource(
+            bool includeInactive, string resourcePath, params object[] args)
+        {
+            return InstantiatePrefabResourceExplicit(resourcePath, args, null, includeInactive);
         }
 
         /////////////// InstantiatePrefabForComponent
@@ -1001,6 +1031,24 @@ namespace Zenject
                 concreteType, prefab, InstantiateUtil.CreateTypeValueList(extraArgs));
         }
 
+        public T InstantiatePrefabForComponent<T>(
+            bool includeInactive, GameObject prefab, params object[] extraArgs)
+        {
+            return (T)InstantiatePrefabForComponent(includeInactive, typeof(T), prefab, extraArgs);
+        }
+
+        public object InstantiatePrefabForComponent(
+            bool includeInactive, Type concreteType, GameObject prefab, params object[] extraArgs)
+        {
+            Assert.That(!extraArgs.Contains(null),
+                "Null value given to factory constructor arguments when instantiating object with type '{0}'. In order to use null use InstantiatePrefabForComponentExplicit", concreteType);
+
+            return InstantiatePrefabForComponentExplicit(
+                concreteType, prefab,
+                InstantiateUtil.CreateTypeValueList(extraArgs),
+                new InjectContext(this, concreteType, null), includeInactive);
+        }
+
         // This is used instead of Instantiate to support specifying null values
         public T InstantiatePrefabForComponentExplicit<T>(
             GameObject prefab, List<TypeValuePair> extraArgMap)
@@ -1015,8 +1063,7 @@ namespace Zenject
                 concreteType, prefab, extraArgMap, new InjectContext(this, concreteType, null));
         }
 
-
-        /////////////// InstantiatePrefabForComponent
+        /////////////// InstantiatePrefabResourceForComponent
 
         public T InstantiatePrefabResourceForComponent<T>(
             string resourcePath, params object[] extraArgs)
@@ -1339,6 +1386,22 @@ namespace Zenject
             {
                 Assert.That(concreteType.DerivesFrom(interfaceType));
                 Bind(interfaceType).ToSingle(concreteType);
+            }
+        }
+
+        public void BindAllInterfacesToInstance<TConcrete>(TConcrete value)
+        {
+            BindAllInterfacesToInstance(typeof(TConcrete), value);
+        }
+
+        public void BindAllInterfacesToInstance(Type concreteType, object value)
+        {
+            Assert.That((value == null && AllowNullBindings) || value.GetType().DerivesFromOrEqual(concreteType));
+
+            foreach (var interfaceType in concreteType.GetInterfaces())
+            {
+                Assert.That(concreteType.DerivesFrom(interfaceType));
+                Bind(interfaceType).ToInstance(concreteType, value);
             }
         }
 
