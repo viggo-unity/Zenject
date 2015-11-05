@@ -9,7 +9,7 @@ using Assert=ModestTree.Assert;
 namespace Zenject.Tests
 {
     [TestFixture]
-    public class TestBindScope : TestWithContainer
+    public class TestSubContainers : TestWithContainer
     {
         class Test0
         {
@@ -18,15 +18,13 @@ namespace Zenject.Tests
         [Test]
         public void TestIsRemoved()
         {
-            using (var scope = Container.CreateScope())
-            {
-                var test1 = new Test0();
+            var subContainer = Container.CreateSubContainer();
+            var test1 = new Test0();
 
-                scope.Bind<Test0>().ToInstance(test1);
+            subContainer.Bind<Test0>().ToInstance(test1);
 
-                Assert.That(Container.ValidateResolve<Test0>().IsEmpty());
-                Assert.That(ReferenceEquals(test1, Container.Resolve<Test0>()));
-            }
+            Assert.That(subContainer.ValidateResolve<Test0>().IsEmpty());
+            Assert.That(ReferenceEquals(test1, subContainer.Resolve<Test0>()));
 
             Assert.That(Container.ValidateResolve<Test0>().Any());
 
@@ -46,20 +44,18 @@ namespace Zenject.Tests
             Test0 test0;
             Test1 test1;
 
-            using (var scope = Container.CreateScope())
-            {
-                var test0Local = new Test0();
+            var subContainer = Container.CreateSubContainer();
+            var test0Local = new Test0();
 
-                scope.Bind<Test0>().ToInstance(test0Local);
-                scope.Bind<Test1>().ToSingle();
+            subContainer.Bind<Test0>().ToInstance(test0Local);
+            subContainer.Bind<Test1>().ToSingle();
 
-                Assert.That(Container.ValidateResolve<Test0>().IsEmpty());
-                test0 = Container.Resolve<Test0>();
-                Assert.IsEqual(test0Local, test0);
+            Assert.That(subContainer.ValidateResolve<Test0>().IsEmpty());
+            test0 = subContainer.Resolve<Test0>();
+            Assert.IsEqual(test0Local, test0);
 
-                Assert.That(Container.ValidateResolve<Test1>().IsEmpty());
-                test1 = Container.Resolve<Test1>();
-            }
+            Assert.That(subContainer.ValidateResolve<Test1>().IsEmpty());
+            test1 = subContainer.Resolve<Test1>();
 
             Assert.That(Container.ValidateResolve<Test0>().Any());
 
@@ -98,21 +94,17 @@ namespace Zenject.Tests
         {
             IFoo foo1;
 
-            using (var scope = Container.CreateScope())
-            {
-                scope.Bind<IFoo>().ToSingle<Foo>();
-                foo1 = Container.Resolve<IFoo>();
-            }
+            var subContainer1 = Container.CreateSubContainer();
+            subContainer1.Bind<IFoo>().ToSingle<Foo>();
+            foo1 = subContainer1.Resolve<IFoo>();
 
             Assert.That(!Container.ValidateResolve<IFoo>().IsEmpty());
 
-            using (var scope = Container.CreateScope())
-            {
-                scope.Bind<IFoo>().ToSingle<Foo>();
-                var foo2 = Container.Resolve<IFoo>();
+            var subContainer2 = Container.CreateSubContainer();
+            subContainer2.Bind<IFoo>().ToSingle<Foo>();
+            var foo2 = subContainer2.Resolve<IFoo>();
 
-                Assert.That(foo2 != foo1);
-            }
+            Assert.That(foo2 != foo1);
         }
     }
 }

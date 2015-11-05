@@ -84,8 +84,7 @@ namespace Zenject.Tests
         {
             var container = new DiContainer();
 
-            var nestedContainer = new DiContainer();
-            nestedContainer.FallbackProvider = new DiContainerProvider(container);
+            var nestedContainer = new DiContainer(container);
 
             // Should fail without Bar<> bound
             Assert.That(!nestedContainer.ValidateObjectGraph<Foo>().IsEmpty());
@@ -100,8 +99,7 @@ namespace Zenject.Tests
         {
             var container = new DiContainer();
 
-            var nestedContainer = new DiContainer();
-            nestedContainer.FallbackProvider = new DiContainerProvider(container);
+            var nestedContainer = new DiContainer(container);
 
             container.Bind<IFoo>().ToSingle<Foo>();
             container.Bind<IFoo>().ToSingle<Foo2>();

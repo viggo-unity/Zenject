@@ -35,24 +35,24 @@ namespace Zenject.Tests
         [Test]
         public void TestCase1()
         {
-            var nestedContainer = new DiContainer();
+            var container1 = new DiContainer();
 
-            Assert.Throws<ZenjectResolveException>(() => nestedContainer.Resolve<IFoo>());
+            Assert.Throws<ZenjectResolveException>(() => container1.Resolve<IFoo>());
             Assert.Throws<ZenjectResolveException>(() => Container.Resolve<IFoo>());
 
             Container.Bind<IFoo>().ToSingle<Foo>();
 
-            Assert.Throws<ZenjectResolveException>(() => nestedContainer.Resolve<IFoo>());
+            Assert.Throws<ZenjectResolveException>(() => container1.Resolve<IFoo>());
             Assert.IsEqual(Container.Resolve<IFoo>().GetBar(), 0);
 
-            nestedContainer.FallbackProvider = new DiContainerProvider(Container);
+            var container2 = new DiContainer(Container);
 
-            Assert.IsEqual(nestedContainer.Resolve<IFoo>().GetBar(), 0);
+            Assert.IsEqual(container2.Resolve<IFoo>().GetBar(), 0);
             Assert.IsEqual(Container.Resolve<IFoo>().GetBar(), 0);
 
-            nestedContainer.Bind<IFoo>().ToSingle<Foo2>();
+            container2.Bind<IFoo>().ToSingle<Foo2>();
 
-            Assert.IsEqual(nestedContainer.Resolve<IFoo>().GetBar(), 1);
+            Assert.IsEqual(container2.Resolve<IFoo>().GetBar(), 1);
             Assert.IsEqual(Container.Resolve<IFoo>().GetBar(), 0);
         }
     }

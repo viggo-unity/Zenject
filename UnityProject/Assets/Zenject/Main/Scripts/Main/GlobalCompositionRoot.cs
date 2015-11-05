@@ -14,7 +14,7 @@ namespace Zenject
     {
         static GlobalCompositionRoot _instance;
         DiContainer _container;
-        IDependencyRoot _dependencyRoot;
+        IFacade _rootFacade;
         bool _hasInitialized;
 
         public override DiContainer Container
@@ -22,6 +22,14 @@ namespace Zenject
             get
             {
                 return _container;
+            }
+        }
+
+        public override IFacade RootFacade
+        {
+            get
+            {
+                return _rootFacade;
             }
         }
 
@@ -38,7 +46,7 @@ namespace Zenject
             }
         }
 
-        public void Awake()
+        protected override void Initialize()
         {
             DontDestroyOnLoad(gameObject);
 
@@ -46,23 +54,16 @@ namespace Zenject
             //go.hideFlags = HideFlags.HideInHierarchy;
 
             _container = CreateContainer(false, this);
-            _dependencyRoot = _container.Resolve<IDependencyRoot>();
+            _rootFacade = _container.Resolve<IFacade>();
         }
 
-        public void InitializeIfNecessary()
+        public void InitializeRootIfNecessary()
         {
             if (!_hasInitialized)
             {
                 _hasInitialized = true;
-                _dependencyRoot.Initialize();
+                _rootFacade.Initialize();
             }
-        }
-
-        // If we're destroyed manually somehow handle that
-        public void OnDestroy()
-        {
-            _instance = null;
-            _dependencyRoot = null;
         }
 
         public static DiContainer CreateContainer(bool allowNullBindings, GlobalCompositionRoot root)
@@ -76,9 +77,9 @@ namespace Zenject
             container.Bind<GlobalCompositionRoot>().ToInstance(root);
             container.Bind<CompositionRoot>().ToInstance(root);
 
-            container.Install<StandardUnityInstaller>();
+            container.Install<StandardInstaller>();
 
-            CompositionRootHelper.InstallSceneInstallers(container, GetGlobalInstallers());
+            container.Install(GetGlobalInstallers());
 
             return container;
         }

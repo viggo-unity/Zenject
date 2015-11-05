@@ -22,7 +22,7 @@ namespace Zenject
             var unboundTypes = _singletonProviderMap.Creators
                 .Select(x => x.GetInstanceType())
                 .Where(x => x.DerivesFrom<T>())
-                .Where(x => !ignoreTypes.Contains(x));
+                .Where(x => !ignoreTypes.ContainsItem(x));
 
 #if ZEN_NOT_UNITY3D
             return unboundTypes.Distinct();
@@ -30,7 +30,7 @@ namespace Zenject
             var unboundPrefabTypes = _prefabSingletonProviderMap.Creators
                 .SelectMany(x => x.GetAllComponentTypes())
                 .Where(x => x.DerivesFrom<T>())
-                .Where(x => !ignoreTypes.Contains(x));
+                .Where(x => !ignoreTypes.ContainsItem(x));
 
             return unboundTypes.Concat(unboundPrefabTypes).Distinct();
 #endif

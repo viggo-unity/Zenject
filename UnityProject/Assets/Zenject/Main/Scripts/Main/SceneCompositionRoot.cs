@@ -1,17 +1,15 @@
 #if !ZEN_NOT_UNITY3D
 
 #pragma warning disable 414
-using ModestTree;
 using System;
 using System.Collections.Generic;
-using ModestTree.Util.Debugging;
 using System.Linq;
+using ModestTree;
+using ModestTree.Util;
 using UnityEngine;
 
 namespace Zenject
 {
-    // Define this class as a component of a top-level game object of your scene heirarchy
-    // Then any children will get injected during resolve stage
     public sealed class SceneCompositionRoot : CompositionRoot
     {
         public static Action<DiContainer> BeforeInstallHooks;
@@ -24,7 +22,7 @@ namespace Zenject
         public MonoInstaller[] Installers = new MonoInstaller[0];
 
         DiContainer _container;
-        IDependencyRoot _dependencyRoot = null;
+        IFacade _rootFacade = null;
 
         static List<IInstaller> _staticInstallers = new List<IInstaller>();
 
@@ -34,6 +32,35 @@ namespace Zenject
             {
                 return _container;
             }
+        }
+
+        public override IFacade RootFacade
+        {
+            get
+            {
+                return _rootFacade;
+            }
+        }
+
+        protected override void Initialize()
+        {
+            InitContainer();
+            InitialInject();
+
+            _rootFacade = _container.Resolve<IFacade>();
+        }
+
+        public void Start()
+        {
+            // Always run the IInitializable's at the very beginning of Start()
+            // This file (SceneCompositionRoot) should always have the earliest execution order (see SceneCompositionRoot.cs.meta)
+            // This is necessary in some edge cases where parts of Unity do not work the same during Awake() as they do in Start/Update
+            // For example, changing rectTransform.localPosition does not automatically update rectTransform.position in some cases
+            // Also, most people treat Awake() as very minimal initialization, such as setting up a valid state for the
+            // object, initializing variables, etc. and treat Start() as the place where more complex initialization occurs,
+            // so this is consistent with that convention as well
+            GlobalCompositionRoot.Instance.InitializeRootIfNecessary();
+            _rootFacade.Initialize();
         }
 
         // This method is used for cases where you need to create the SceneCompositionRoot entirely in code
@@ -53,12 +80,15 @@ namespace Zenject
             return gameObject.AddComponent<SceneCompositionRoot>();
         }
 
-        public void Awake()
+        void InitContainer()
         {
             _container = CreateContainer(
                 false, GlobalCompositionRoot.Instance.Container, _staticInstallers);
             _staticInstallers.Clear();
+        }
 
+        void InitialInject()
+        {
             if (InjectFullScene)
             {
                 var rootGameObjects = GameObject.FindObjectsOfType<Transform>()
@@ -74,30 +104,15 @@ namespace Zenject
             {
                 _container.InjectGameObject(gameObject, true, !OnlyInjectWhenActive);
             }
-
-            _dependencyRoot = _container.Resolve<IDependencyRoot>();
-        }
-
-        public void Start()
-        {
-            // Always run the IInitializable's at the very beginning of Start()
-            // This file (SceneCompositionRoot) should always have the earliest execution order (see SceneCompositionRoot.cs.meta)
-            // This is necessary in some edge cases where parts of Unity do not work the same during Awake() as they do in Start/Update
-            // For example, changing rectTransform.localPosition does not automatically update rectTransform.position in some cases
-            // Also, most people treat Awake() as very minimal initialization, such as setting up a valid state for the
-            // object, initializing variables, etc. and treat Start() as the place where more complex initialization occurs,
-            // so this is consistent with that convention as well
-            GlobalCompositionRoot.Instance.InitializeIfNecessary();
-            _dependencyRoot.Initialize();
         }
 
         public DiContainer CreateContainer(
             bool allowNullBindings, DiContainer parentContainer, List<IInstaller> extraInstallers)
         {
-            var container = new DiContainer(this.transform);
+            var container = new DiContainer(this.transform, parentContainer);
 
             container.AllowNullBindings = allowNullBindings;
-            container.FallbackProvider = new DiContainerProvider(parentContainer);
+
             container.Bind<SceneCompositionRoot>().ToInstance(this);
             container.Bind<CompositionRoot>().ToInstance(this);
 
@@ -108,7 +123,7 @@ namespace Zenject
                 BeforeInstallHooks = null;
             }
 
-            container.Install<StandardUnityInstaller>();
+            container.Install<StandardInstaller>();
 
             var allInstallers = extraInstallers.Concat(Installers).ToList();
 
@@ -118,7 +133,7 @@ namespace Zenject
             }
             else
             {
-                CompositionRootHelper.InstallSceneInstallers(container, allInstallers);
+                container.Install(allInstallers);
             }
 
             if (AfterInstallHooks != null)

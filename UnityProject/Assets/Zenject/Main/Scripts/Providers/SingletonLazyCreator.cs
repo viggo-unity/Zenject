@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using ModestTree;
 using System.Linq;
+using ModestTree;
 
 namespace Zenject
 {
@@ -109,6 +109,7 @@ namespace Zenject
                     var concreteType = GetTypeToInstantiate(context.MemberType);
 
                     bool autoInject = false;
+
                     _instance = _container.InstantiateExplicit(
                         concreteType, new List<TypeValuePair>(), context, _id.Identifier, autoInject);
 

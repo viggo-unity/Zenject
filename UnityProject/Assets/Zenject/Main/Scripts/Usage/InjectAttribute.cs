@@ -3,7 +3,7 @@ using System;
 namespace Zenject
 {
     [AttributeUsage(AttributeTargets.Constructor | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
-    public class InjectAttribute : Attribute
+    public class InjectAttribute : InjectAttributeBase
     {
         public InjectAttribute(string identifier)
         {
@@ -12,12 +12,6 @@ namespace Zenject
 
         public InjectAttribute()
         {
-        }
-
-        public string Identifier
-        {
-            get;
-            private set;
         }
     }
 }

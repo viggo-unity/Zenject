@@ -52,6 +52,11 @@ namespace ModestTree
             IsEqual(left, right, "");
         }
 
+        public static void Throws(Action action)
+        {
+            Throws<Exception>(action);
+        }
+
         //[Conditional("UNITY_EDITOR")]
         public static void Throws<TException>(Action action)
             where TException : Exception

@@ -10,11 +10,11 @@ namespace Zenject.Tests
     [TestFixture]
     public class TestBothInterfaceAndConcreteBoundToSameSingleton : TestWithContainer
     {
-        private abstract class Test0
+        abstract class Test0
         {
         }
 
-        private class Test1 : Test0
+        class Test1 : Test0
         {
         }
 

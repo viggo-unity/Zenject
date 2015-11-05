@@ -2,11 +2,10 @@
 
 using System;
 using System.Collections;
+using System.Linq;
 using ModestTree;
 using ModestTree.Util;
-using ModestTree.Util.Debugging;
 using UnityEngine;
-using System.Linq;
 
 namespace Zenject
 {
@@ -69,14 +68,14 @@ namespace Zenject
                 _beforeInstallHooks = null;
             }
 
-            CompositionRootHelper.InstallSceneInstallers(container, PreInstallers);
+            container.Install(PreInstallers);
 
             ProcessDecoratorInstallers(container, true);
         }
 
         public void AddPostBindings(DiContainer container)
         {
-            CompositionRootHelper.InstallSceneInstallers(container, PostInstallers);
+            container.Install(PostInstallers);
 
             ProcessDecoratorInstallers(container, false);
 

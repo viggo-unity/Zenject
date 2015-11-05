@@ -51,6 +51,10 @@ namespace Zenject
         // When optional, null is a valid value to be returned
         public readonly bool Optional;
 
+        // When set to true, this will only look up dependencies in the local container and will not
+        // search in parent containers
+        public readonly bool LocalOnly;
+
         // When optional, this is used to provide the value
         public readonly object FallBackValue;
 
@@ -62,7 +66,9 @@ namespace Zenject
 
         public InjectContext(
             DiContainer container, Type memberType, string identifier, bool optional,
-            Type objectType, object objectInstance, string memberName, InjectContext parentContext, string concreteIdentifier, object fallBackValue)
+            Type objectType, object objectInstance, string memberName,
+            InjectContext parentContext, string concreteIdentifier,
+            object fallBackValue, bool localOnly)
         {
             ObjectType = objectType;
             ObjectInstance = objectInstance;
@@ -75,12 +81,13 @@ namespace Zenject
             Container = container;
             BindingId = new BindingId(memberType, identifier);
             ParentContext = parentContext;
+            LocalOnly = localOnly;
         }
 
         public InjectContext(
             DiContainer container, Type memberType, string identifier, bool optional,
             Type objectType, object objectInstance, string memberName, InjectContext parentContext)
-            : this(container, memberType, identifier, optional, objectType, objectInstance, memberName, parentContext, null, null)
+            : this(container, memberType, identifier, optional, objectType, objectInstance, memberName, parentContext, null, null, false)
         {
         }
 
@@ -173,16 +180,22 @@ namespace Zenject
             return result.ToString();
         }
 
+        public InjectContext ChangeObjectInstance(object instance)
+        {
+            return new InjectContext(
+                Container, MemberType, Identifier, Optional, ObjectType, instance, MemberName, ParentContext, ConcreteIdentifier, FallBackValue, LocalOnly);
+        }
+
         public InjectContext ChangeMemberType(Type newMemberType)
         {
             return new InjectContext(
-                Container, newMemberType, Identifier, Optional, ObjectType, ObjectInstance, MemberName, ParentContext, ConcreteIdentifier, FallBackValue);
+                Container, newMemberType, Identifier, Optional, ObjectType, ObjectInstance, MemberName, ParentContext, ConcreteIdentifier, FallBackValue, LocalOnly);
         }
 
         public InjectContext ChangeConcreteIdentifier(string concreteIdentifier)
         {
             return new InjectContext(
-                Container, MemberType, Identifier, Optional, ObjectType, ObjectInstance, MemberName, ParentContext, concreteIdentifier, FallBackValue);
+                Container, MemberType, Identifier, Optional, ObjectType, ObjectInstance, MemberName, ParentContext, concreteIdentifier, FallBackValue, LocalOnly);
         }
     }
 }

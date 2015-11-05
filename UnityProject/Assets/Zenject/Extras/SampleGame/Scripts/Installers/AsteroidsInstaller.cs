@@ -14,7 +14,8 @@ namespace Asteroids
 
     public class AsteroidsInstaller : MonoInstaller
     {
-        public Settings SceneSettings;
+        [SerializeField]
+        Settings _settings;
 
         public override void InstallBindings()
         {
@@ -23,7 +24,7 @@ namespace Asteroids
             // Install the main game
             InstallAsteroids();
             InstallSettings();
-            InitPriorities();
+            InitExecutionOrder();
         }
 
         // In this example there is only one 'installer' but in larger projects you
@@ -55,7 +56,7 @@ namespace Asteroids
             // only one of them
             // So any classes that want to create new asteroid objects can simply include a injected field
             // or constructor parameter of type Asteroid.Factory, then call create on that
-            Container.BindGameObjectFactory<Asteroid.Factory>(SceneSettings.Asteroid.Prefab);
+            Container.BindGameObjectFactory<Asteroid.Factory>(_settings.Asteroid.Prefab);
 
             Container.Bind<IInitializable>().ToSingle<GameController>();
             Container.Bind<ITickable>().ToSingle<GameController>();
@@ -66,11 +67,11 @@ namespace Asteroids
             // Here's another way to create game objects dynamically, by using ToTransientPrefab
             // We prefer to use ITickable / IInitializable in favour of the Monobehaviour methods
             // so we just use a monobehaviour wrapper class here to pass in asset data
-            Container.Bind<ShipHooks>().ToTransientPrefab<ShipHooks>(SceneSettings.Ship.Prefab).WhenInjectedInto<Ship>();
+            Container.Bind<ShipHooks>().ToTransientPrefab<ShipHooks>(_settings.Ship.Prefab).WhenInjectedInto<Ship>();
 
             // In this game there is only one camera so an enum isn't necessary
             // but used here to show how it would work if there were multiple
-            Container.Bind<Camera>("Main").ToSingleInstance(SceneSettings.MainCamera);
+            Container.Bind<Camera>("Main").ToSingleInstance(_settings.MainCamera);
 
             Container.Bind<Ship>().ToSingle();
             Container.Bind<ITickable>().ToSingle<Ship>();
@@ -79,27 +80,26 @@ namespace Asteroids
 
         void InstallSettings()
         {
-            Container.Bind<ShipStateMoving.Settings>().ToSingleInstance(SceneSettings.Ship.StateMoving);
-            Container.Bind<ShipStateDead.Settings>().ToSingleInstance(SceneSettings.Ship.StateDead);
-            Container.Bind<ShipStateWaitingToStart.Settings>().ToSingleInstance(SceneSettings.Ship.StateStarting);
+            Container.Bind<ShipStateMoving.Settings>().ToSingleInstance(_settings.Ship.StateMoving);
+            Container.Bind<ShipStateDead.Settings>().ToSingleInstance(_settings.Ship.StateDead);
+            Container.Bind<ShipStateWaitingToStart.Settings>().ToSingleInstance(_settings.Ship.StateStarting);
 
-            Container.Bind<AsteroidManager.Settings>().ToSingleInstance(SceneSettings.Asteroid.Spawner);
-            Container.Bind<Asteroid.Settings>().ToSingleInstance(SceneSettings.Asteroid.General);
+            Container.Bind<AsteroidManager.Settings>().ToSingleInstance(_settings.Asteroid.Spawner);
+            Container.Bind<Asteroid.Settings>().ToSingleInstance(_settings.Asteroid.General);
         }
 
         // We don't need to include these bindings but often its nice to have
         // control over initialization-order and update-order
-        void InitPriorities()
+        void InitExecutionOrder()
         {
-            Container.Bind<List<Type>>().ToInstance(InitializablesOrder)
-                .WhenInjectedInto<InitializablePrioritiesInstaller>();
-            Container.Install<InitializablePrioritiesInstaller>();
-
-            Container.Bind<List<Type>>().ToInstance(TickablesOrder).WhenInjectedInto<TickablePrioritiesInstaller>();
-            Container.Install<TickablePrioritiesInstaller>();
-
-            Container.Bind<List<Type>>().ToInstance(FixedTickablesOrder).WhenInjectedInto<FixedTickablePrioritiesInstaller>();
-            Container.Install<FixedTickablePrioritiesInstaller>();
+            Container.Install<ExecutionOrderInstaller>(
+                new List<Type>()
+                {
+                    // Re-arrange this list to control update order
+                    // These classes will be initialized and updated in this order and disposed of in reverse order
+                    typeof(AsteroidManager),
+                    typeof(GameController),
+                });
         }
 
         [Serializable]
@@ -126,24 +126,5 @@ namespace Asteroids
                 public Asteroid.Settings General;
             }
         }
-
-        static List<Type> InitializablesOrder = new List<Type>()
-        {
-            // Re-arrange this list to control init order
-            typeof(GameController),
-        };
-
-        static List<Type> TickablesOrder = new List<Type>()
-        {
-            // Re-arrange this list to control update order
-            typeof(AsteroidManager),
-            typeof(GameController),
-        };
-
-        static List<Type> FixedTickablesOrder = new List<Type>()
-        {
-            // Re-arrange this list to control update order
-            typeof(AsteroidManager),
-        };
     }
 }

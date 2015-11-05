@@ -54,7 +54,18 @@ namespace Zenject
                 Log.Trace("Validating Scene '{0}'", sceneInfo.Path);
                 EditorApplication.OpenScene(sceneInfo.Path);
 
-                errors.AddRange(ValidateCurrentScene().Take(maxErrors - errors.Count));
+                var sceneErrors = ValidateCurrentScene().Take(maxErrors - errors.Count).ToList();
+
+                if (sceneErrors.Any())
+                {
+                    Log.Trace("Failed to validate scene '{0}'", sceneInfo.Path);
+                }
+                else
+                {
+                    Log.Trace("Scene '{0}' validated successfully", sceneInfo.Path);
+                }
+
+                errors.AddRange(sceneErrors);
 
                 if (errors.Count >= maxErrors)
                 {
@@ -122,7 +133,7 @@ namespace Zenject
             var globalContainer = GlobalCompositionRoot.CreateContainer(true, null);
             var container = compRoot.CreateContainer(true, globalContainer, new List<IInstaller>());
 
-            foreach (var error in container.ValidateResolve(new InjectContext(container, typeof(IDependencyRoot), null)))
+            foreach (var error in container.ValidateResolve(new InjectContext(container, typeof(IFacade), null)))
             {
                 yield return error;
             }

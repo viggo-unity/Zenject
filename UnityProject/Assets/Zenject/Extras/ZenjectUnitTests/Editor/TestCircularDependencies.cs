@@ -108,6 +108,54 @@ namespace Zenject.Tests
             Assert.IsEqual(test1.Other, test2);
             Assert.IsEqual(test2.Other, test1);
         }
+
+        class Test5
+        {
+            public Test5(Test6 Other)
+            {
+                Assert.IsNotNull(Other);
+            }
+        }
+
+        class Test6
+        {
+            public Test6(Test5 other)
+            {
+                Assert.IsNotNull(other);
+            }
+        }
+
+        [Test]
+        public void TestConstructorInject()
+        {
+            if (Container.ChecksForCircularDependencies)
+            {
+                Container.Bind<Test5>().ToSingle();
+                Container.Bind<Test6>().ToSingle();
+
+                Assert.Throws(() => Container.Resolve<Test5>());
+                Assert.Throws(() => Container.Resolve<Test6>());
+
+                Assert.That(!Container.ValidateResolve<Test6>().IsEmpty());
+            }
+        }
+
+        class Test7
+        {
+            public Test7(Test7 other)
+            {
+            }
+        }
+
+        [Test]
+        public void TestSelfDependency()
+        {
+            if (Container.ChecksForCircularDependencies)
+            {
+                Container.Bind<Test7>().ToSingle();
+                Assert.Throws(() => Container.Instantiate<Test7>());
+            }
+        }
     }
 }
 
