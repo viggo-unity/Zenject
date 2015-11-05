@@ -822,6 +822,9 @@ namespace Zenject
         {
             var gameObj = (GameObject)GameObject.Instantiate(prefab);
 
+            // CORE: prevent leaks
+            gameObj.hideFlags = HideFlags.DontSave;
+
             if (_rootTransform != null)
             {
                 // By default parent to comp root
@@ -848,6 +851,9 @@ namespace Zenject
                 gameObj.transform.SetParent(_rootTransform, false);
             }
 
+            // CORE: prevent leaks
+            gameObj.hideFlags = HideFlags.DontSave;
+
             return gameObj;
         }
 
@@ -857,6 +863,9 @@ namespace Zenject
             Assert.That(componentType.DerivesFrom<Component>(), "Expected type '{0}' to derive from UnityEngine.Component", componentType.Name());
 
             var gameObj = new GameObject(name);
+
+            // CORE: prevent leaks
+            gameObj.hideFlags = HideFlags.DontSave;
 
             if (_rootTransform != null)
             {
@@ -901,6 +910,9 @@ namespace Zenject
             Assert.That(componentType.DerivesFrom<Component>(), "Expected type '{0}' to derive from UnityEngine.Component", componentType.Name());
 
             var gameObj = (GameObject)GameObject.Instantiate(prefab);
+            
+            // CORE: prevent leaks
+            gameObj.hideFlags = HideFlags.DontSave;
 
             if (_rootTransform != null)
             {

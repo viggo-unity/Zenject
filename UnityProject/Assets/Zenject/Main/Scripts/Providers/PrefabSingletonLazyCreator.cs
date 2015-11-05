@@ -97,6 +97,9 @@ namespace Zenject
 
                 _rootObj = (GameObject)GameObject.Instantiate(prefab);
 
+                // CORE: prevent leaks
+                _rootObj.hideFlags = HideFlags.DontSave;
+
                 // Default parent to comp root
                 _rootObj.transform.SetParent(_container.Resolve<CompositionRoot>().transform, false);
                 _rootObj.SetActive(true);
