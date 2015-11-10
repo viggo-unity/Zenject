@@ -174,4 +174,17 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild" Condition=" '$(TeamCityBuild)'!='true' And $(MSBuildToolsPath) != ''">
+    <Message Text="OS Detected: $(OS)" />
+    <!--		For Windows -->
+    <Exec Condition="Exists('AfterBuild.sh') And $(OS) == 'Windows'" ConsoleToMSBuild="true" Command="sh AfterBuild.sh">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+    <Exec Condition="Exists('AfterBuild.bat') And $(OS) == 'Windows'" ConsoleToMSBuild="true" Command="AfterBuild.bat">
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfExec" />
+    </Exec>
+    <!--		For Other platforms -->
+    <Exec Condition="Exists('AfterBuild.sh') And $(OS) != 'Windows'" Command="sh AfterBuild.sh">
+    </Exec>
+  </Target>
 </Project>

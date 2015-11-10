@@ -12,6 +12,8 @@ namespace Zenject
 {
     public sealed class GlobalCompositionRoot : CompositionRoot
     {
+        private const string GlobalCompositionRootName = "Global Composition Root";
+
         static GlobalCompositionRoot _instance;
         DiContainer _container;
         IFacade _rootFacade;
@@ -33,15 +35,40 @@ namespace Zenject
             }
         }
 
+        private static GlobalCompositionRoot FindOrInstantiateRoot()
+        {
+            var existingRootObj = GameObject.Find(GlobalCompositionRootName);
+
+            if (existingRootObj != null)
+            {
+                var existingComponent = existingRootObj.GetComponent<GlobalCompositionRoot>();
+
+                if (existingComponent != null)
+                {
+                    return existingComponent;
+                }
+                else
+                {
+                    return existingRootObj.AddComponent<GlobalCompositionRoot>();
+                }
+            }
+            else
+            {
+                return new GameObject(GlobalCompositionRootName)
+                        .AddComponent<GlobalCompositionRoot>();
+            }
+        }
+
+
         public static GlobalCompositionRoot Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new GameObject("Global Composition Root")
-                        .AddComponent<GlobalCompositionRoot>();
+                    _instance = FindOrInstantiateRoot();
                 }
+
                 return _instance;
             }
         }
