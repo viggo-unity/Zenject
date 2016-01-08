@@ -882,7 +882,7 @@ namespace Zenject
             var gameObj = (GameObject)GameObject.Instantiate(prefab);
 
             // CORE: prevent leaks
-            gameObj.hideFlags = HideFlags.DontSave;
+            //gameObj.hideFlags = HideFlags.DontSave;
 
             if (_rootTransform != null)
             {
@@ -911,7 +911,7 @@ namespace Zenject
             }
 
             // CORE: prevent leaks
-            gameObj.hideFlags = HideFlags.DontSave;
+            //gameObj.hideFlags = HideFlags.DontSave;
 
             return gameObj;
         }
@@ -924,7 +924,7 @@ namespace Zenject
             var gameObj = new GameObject(name);
 
             // CORE: prevent leaks
-            gameObj.hideFlags = HideFlags.DontSave;
+            //gameObj.hideFlags = HideFlags.DontSave;
 
             if (_rootTransform != null)
             {
@@ -971,7 +971,7 @@ namespace Zenject
             var gameObj = (GameObject)GameObject.Instantiate(prefab);
             
             // CORE: prevent leaks
-            gameObj.hideFlags = HideFlags.DontSave;
+            //gameObj.hideFlags = HideFlags.DontSave;
 
             if (_rootTransform != null)
             {
